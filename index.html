@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6F5F1">
+  <meta name="description" content="FocusFlow: distraction-free focus sessions and a record of how much you actually focus.">
+  <title>FocusFlow</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <svg viewBox="0 0 28 28" aria-hidden="true">
+          <circle cx="14" cy="14" r="12" fill="none" stroke="#16181B" stroke-width="2.5"/>
+          <path d="M14 6a8 8 0 1 1-8 8" fill="none" stroke="#E9A23B" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        FocusFlow
+      </div>
+      <nav class="tabs" aria-label="Sections">
+        <button class="tab" type="button" data-view="focus" aria-current="page">Focus</button>
+        <button class="tab" type="button" data-view="insights">Insights</button>
+        <button class="tab" type="button" data-view="history">History</button>
+        <button class="tab" type="button" data-view="settings">Settings</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <!-- FOCUS -->
+    <section class="view" data-view="focus" id="view-focus">
+      <div class="focus-layout">
+        <div class="panel">
+          <form id="start-form" class="start-form" autocomplete="off">
+            <div>
+              <label class="label" for="task-input">What are you working on?</label>
+              <input id="task-input" class="input" type="text" maxlength="80" placeholder="e.g. Organic chemistry, chapter 7">
+            </div>
+            <fieldset>
+              <legend class="label">Session length</legend>
+              <div class="length-row">
+                <div class="chips">
+                  <button type="button" class="chip preset" data-minutes="25">25 min</button>
+                  <button type="button" class="chip preset" data-minutes="50">50 min</button>
+                  <button type="button" class="chip preset" data-minutes="90">90 min</button>
+                </div>
+                <label class="custom-len">
+                  <span>or</span>
+                  <input id="custom-minutes" type="number" min="1" max="240" step="1" value="25" inputmode="numeric" aria-label="Custom length in minutes">
+                  <span>min</span>
+                </label>
+              </div>
+            </fieldset>
+            <button id="start-btn" class="btn btn-primary btn-lg" type="submit">Start focusing</button>
+          </form>
+
+          <div id="running" class="running" hidden>
+            <div class="timer">
+              <svg viewBox="0 0 220 220" aria-hidden="true">
+                <circle class="ring-track" cx="110" cy="110" r="100" fill="none" stroke-width="10"/>
+                <circle id="ring-progress" class="ring-progress" cx="110" cy="110" r="100" fill="none" stroke-width="10"/>
+              </svg>
+              <div class="timer-center">
+                <div class="clock" id="clock" role="timer">25:00</div>
+                <div class="run-task" id="run-task"></div>
+                <div class="run-state" id="run-state">Focusing</div>
+              </div>
+            </div>
+            <div class="run-controls">
+              <button id="pause-btn" class="btn btn-ghost" type="button">Pause</button>
+              <button id="tempt-btn" class="btn btn-ghost" type="button">I'm tempted</button>
+              <button id="end-btn" class="btn btn-text" type="button">End session</button>
+            </div>
+            <p class="note run-meta" id="run-distractions" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <aside class="panel side">
+          <h2>Stay away from</h2>
+          <ul id="block-chips" class="block-list"></ul>
+          <p class="note">
+            FocusFlow can't block other apps or websites. Keep these out of reach: log out, put your phone in another room, or turn on your phone's Focus mode. Edit this list in Settings.
+          </p>
+          <div class="today-block">
+            <h2>Today</h2>
+            <p class="big" id="today-mini"></p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- INSIGHTS -->
+    <section class="view" data-view="insights" id="view-insights" hidden>
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-label">Focused today</span>
+          <strong class="stat-value" id="s-today">0s</strong>
+          <span class="stat-sub" id="s-today-sub"></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Daily goal</span>
+          <strong class="stat-value" id="s-goal">Not set</strong>
+          <div class="meter"><span id="s-goal-bar"></span></div>
+          <span class="stat-sub" id="s-goal-sub"></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Streak</span>
+          <strong class="stat-value" id="s-streak">0</strong>
+          <span class="stat-sub">days in a row with a finished session</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Sessions finished</span>
+          <strong class="stat-value" id="s-rate">—</strong>
+          <span class="stat-sub" id="s-rate-sub"></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Last 7 days</h2>
+          <span class="note" id="week-total"></span>
+        </div>
+        <div class="week" id="week-chart" role="img" aria-label="Focused time per day for the last seven days"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Top tasks, last 7 days</h2></div>
+        <ol class="list" id="top-tasks"></ol>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="view" data-view="history" id="view-history" hidden>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Session log</h2>
+          <span class="note">Newest first</span>
+        </div>
+        <div id="history-list"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" data-view="settings" id="view-settings" hidden>
+      <div class="panel">
+        <h2>Goals and blocking</h2>
+        <form id="settings-form" class="form-grid">
+          <label class="field">
+            <span>Daily focus goal (minutes)</span>
+            <input id="goal-input" class="input" type="number" min="0" max="1440" step="5" inputmode="numeric">
+          </label>
+          <label class="field">
+            <span>Default session length (minutes)</span>
+            <input id="default-input" class="input" type="number" min="1" max="240" step="1" inputmode="numeric">
+          </label>
+          <label class="field">
+            <span>Stay-away list, one per line</span>
+            <textarea id="block-input" class="input" rows="6" maxlength="2000"></textarea>
+          </label>
+          <p class="note">Shown on the Focus screen as a reminder. Up to 30 items.</p>
+          <div><button class="btn btn-primary" type="submit">Save settings</button></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Your data</h2>
+        <p class="note data-note">
+          Sessions are stored only in this browser. Export a backup now and then, and before clearing browser data or switching devices.
+        </p>
+        <div class="row">
+          <button id="export-btn" class="btn btn-ghost" type="button">Export backup</button>
+          <label class="btn btn-ghost file-btn">
+            Import backup
+            <input id="import-input" type="file" accept="application/json,.json" hidden>
+          </label>
+          <button id="clear-btn" class="btn btn-danger" type="button">Erase all data</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

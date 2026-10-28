@@ -1,0 +1,11 @@
+{
+  "name": "focusflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FocusFlow: focus sessions and productivity analytics. Runs as a static site.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/logic.test.mjs",
+    "serve": "python3 -m http.server 8080"
+  }
+}
